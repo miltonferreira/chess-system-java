@@ -1,7 +1,7 @@
 package boardgame;
 
 public class Piece {
-	//-------------- Peça do jogo de xadrez --------------
+	//-------------- Posicionamento da Peça tabuleiro --------------
 	
 	protected Position position;	//pega a classe Position
 	private Board board;			//tabuleiro do jogo
