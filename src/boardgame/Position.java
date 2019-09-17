@@ -1,7 +1,8 @@
 package boardgame;
 
 public class Position {
-
+	//-------------- Posiçao da peça no tabuleiro --------------
+	
 	private int row;
 	private int column;
 	
