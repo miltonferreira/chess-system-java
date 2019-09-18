@@ -6,7 +6,7 @@ public class Board {
 	private int rows; // linhas
 	private int columns; // colunas
 
-	private Piece[][] pieces; // Matriz de peças
+	private Piece[][] pieces; // Matriz de peças da classe Piece
 
 	public Board(int rows, int columns) {
 
@@ -43,5 +43,17 @@ public class Board {
 	public Piece piece(Position position) {
 		return pieces[position.getRow()][position.getColumn()];
 	}
+	
+	//na matriz de peças do tabuleiro, esse metodo
+	//posiciona a peça na linha e coluna indicada
+	public void placePiece(Piece piece, Position position) {
+		
+		//passa a peça para a matriz/tabuleiro
+		pieces[position.getRow()][position.getColumn()] = piece;
+		//peça recebe sua posicao em linha e coluna
+		piece.position = position;
+		
+	}
+	
 
 }

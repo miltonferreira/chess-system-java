@@ -19,9 +19,9 @@ public class UI {
 	//imprime uma unica peça na tela
 	private static void printPiece(ChessPiece piece) {
 		if(piece == null) {
-			System.out.print("-");
+			System.out.print("-");		//se posicao estiver vazia adiciona -
 		}else {
-			System.out.print(piece);
+			System.out.print(piece);	//adiciona a peça na posicao
 		}
 		System.out.print(" ");
 	}
