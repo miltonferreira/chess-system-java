@@ -65,6 +65,11 @@ public class ChessMatch {
 			throw new ChessException("There is not a piece on source position.");
 		}
 		
+		//se nao existe movimentos possiveis para a peça
+		if(!board.piece(position).isThereAnyPossibleMove()) {
+			throw new ChessException("There is not possible moves for the chess piece.");
+		}
+		
 	}
 
 	//

@@ -16,5 +16,12 @@ public class King extends ChessPiece{
 		//indica no tabuleiro que é a Torre/Rook
 		return "K";
 	}
+
+	@Override
+	public boolean[][] possibleMoves() {
+		//cria uma matriz de booleanos com as dimensoes do tabuleiro 
+		boolean[][] mat = new boolean[getBoard().getRows()][getBoard().getColumns()];
+		return mat;
+	}
 	
 }

@@ -19,4 +19,11 @@ public class Rook extends ChessPiece{
 		return "R";
 	}
 	
+	@Override
+	public boolean[][] possibleMoves() {
+		//cria uma matriz de booleanos com as dimensoes do tabuleiro 
+		boolean[][] mat = new boolean[getBoard().getRows()][getBoard().getColumns()];
+		return mat;
+	}
+	
 }
