@@ -24,7 +24,12 @@ public class Program {
 				System.out.println();
 				System.out.print("Source: " );
 				
-				ChessPosition source = UI.readChessPosition(sc);	//recebe a posicao indicada do jogador
+				ChessPosition source = UI.readChessPosition(sc);				//recebe a posicao indicada do jogador
+				
+				boolean[][] possibleMoves = chessMatch.possibleMoves(source);	//checa posicoes para movimentar a peça no tabuleiro
+				
+				UI.clearScreen();												//limpa a tela
+				UI.printBoard(chessMatch.getPieces(), possibleMoves);			//Mostra o tabuleiro, colorindo para onde a peça pode se mover
 				
 				System.out.println();			
 				System.out.print("Target: ");
