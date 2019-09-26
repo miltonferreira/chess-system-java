@@ -21,9 +21,9 @@ public class Program {
 		while(true) {
 			
 			try {
-				UI.clearScreen();			//limpa a tela
-				UI.printMatch(chessMatch);	//mostra partida
 				
+				UI.clearScreen();			//limpa a tela
+				UI.printMatch(chessMatch, captured);	//mostra partida
 				
 				System.out.println();
 				System.out.print("Source: " );

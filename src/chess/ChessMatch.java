@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import boardgame.Board;
 import boardgame.Piece;
 import boardgame.Position;
@@ -14,6 +17,9 @@ public class ChessMatch {
 	private int turn;
 	private Color currentPlayer;
 	private Board board;
+	
+	private List<Piece> piecesOnTheBoard = new ArrayList<>();	// peças no tabuleiro
+	private List<Piece> capturedPieces = new ArrayList<>();		// peças capturadas
 
 	public ChessMatch() {
 		
@@ -21,7 +27,7 @@ public class ChessMatch {
 		turn = 1;						// turno 1
 		currentPlayer = Color.WHITE;	//peças brancas começam primeiro
 		
-		initialSetup(); // posiciona as peças no tabuleiro
+		initialSetup(); 				// posiciona as peças no tabuleiro
 	}
 	
 	public int getTurn() {
@@ -73,15 +79,21 @@ public class ChessMatch {
 		
 	}
 	
-	//
+	//movimento da peça no tabuleiro
 	private Piece makeMove(Position source, Position target) {
 		
 		Piece p = board.removePiece(source);				//retira a peça na origem dela
 		Piece capturedPiece = board.removePiece(target);	//remove a peça que estiver no caminha da outra peça
 		
-		board.placePiece(p, target); 	//coloca a peça na nova posiçao
+		board.placePiece(p, target); 						//coloca a peça na nova posiçao
 		
-		return capturedPiece;			//retorna a peça capturada
+		//caso nao for null,  significa que houve peça capturada
+		if(capturedPiece != null) {
+			piecesOnTheBoard.remove(capturedPiece);			//remove da lista peça capturada
+			capturedPieces.add(capturedPiece);				//adiciona peça capturada a lista
+		}
+		
+		return capturedPiece;								//retorna a peça capturada
 	}
 
 	//valida se existe a posicao indicada
@@ -118,10 +130,10 @@ public class ChessMatch {
 		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;	// expressao ternaria, se for white troca para black, se nao fica white
 	}
 
-	//
+	//Posiciona peça na linha/coluna indicada
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
-		board.placePiece(piece, new ChessPosition(column, row).toPosition()); // recebe linha/coluna e converte para
-																				// console/xadrez
+		board.placePiece(piece, new ChessPosition(column, row).toPosition()); 	// recebe linha/coluna e converte para console/xadrez
+		piecesOnTheBoard.add(piece);											// adiciona a peça na lista
 	}
 
 	// Inicia a partida de xadrez, colocando as peças no tabuleiro
