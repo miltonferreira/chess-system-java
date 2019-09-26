@@ -9,14 +9,29 @@ import chess.pieces.Rook;
 public class ChessMatch {
 	// -------------- CORE do jogo - Acontece as interaçoes/ partida de xadrez
 	// --------------
-
+	
+	
+	private int turn;
+	private Color currentPlayer;
 	private Board board;
 
 	public ChessMatch() {
-		board = new Board(8, 8); // cria o tabuleiro com 8x8 posicoes
+		
+		board = new Board(8, 8); 		// cria o tabuleiro com 8x8 posicoes
+		turn = 1;						// turno 1
+		currentPlayer = Color.WHITE;	//peças brancas começam primeiro
+		
 		initialSetup(); // posiciona as peças no tabuleiro
 	}
-
+	
+	public int getTurn() {
+		return turn;
+	}
+	
+	public Color getCurrentPlayer() {
+		return currentPlayer;
+	}
+	
 	// retorna uma matriz de peças de xadrez da partida
 	public ChessPiece[][] getPieces() {
 
@@ -42,18 +57,19 @@ public class ChessMatch {
 		return board.piece(position).possibleMoves();	//retorna a matriz com movimentos possiveis
 	}
 	
+	// faz a jogada e movimenta a peça no tabuleiro
 	public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
 		
 		Position source = sourcePosition.toPosition();	//recebe a posicao da peça
 		Position target = targetPosition.toPosition();	//posicao que deseja mover a peça
 		
-		validateSourcePosition(source);				//valida se existe a posicao indicada
+		validateSourcePosition(source);					//valida se existe a posicao indicada
 		
-		validateTargetPosition(source, target);		//valida se pode ir para a posicao
+		validateTargetPosition(source, target);			//valida se pode ir para a posicao
 		
 		Piece capturedPiece = makeMove(source, target);
-		
-		return (ChessPiece)capturedPiece;	// faz um downcast pois é tipo Piece, e nao uma peça do xadrez
+		nextTurn();										//chama proximo turno
+		return (ChessPiece)capturedPiece;				// faz um downcast pois é tipo Piece, e nao uma peça do xadrez
 		
 	}
 	
@@ -76,6 +92,11 @@ public class ChessMatch {
 			throw new ChessException("There is not a piece on source position.");
 		}
 		
+		//se o jogador pegar uma peça que nao seja do turno, lança exceçao
+		if(currentPlayer != ((ChessPiece)board.piece(position)).getColor()) {
+			throw new ChessException("The chosen piece is not yours");
+		}
+		
 		//se nao existe movimentos possiveis para a peça
 		if(!board.piece(position).isThereAnyPossibleMove()) {
 			throw new ChessException("There is not possible moves for the chess piece.");
@@ -89,6 +110,12 @@ public class ChessMatch {
 		if(!board.piece(source).possibleMove(target)) {
 			throw new ChessException("The chess piece can't move to target position.");
 		}
+	}
+	
+	// vai para o proximo turno
+	private void nextTurn() {
+		turn++;
+		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;	// expressao ternaria, se for white troca para black, se nao fica white
 	}
 
 	//
