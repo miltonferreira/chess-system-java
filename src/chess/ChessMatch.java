@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import boardgame.Board;
 import boardgame.Piece;
@@ -15,8 +16,9 @@ public class ChessMatch {
 	
 	
 	private int turn;
-	private Color currentPlayer;
+	private Color currentPlayer;	// indica se é branca ou preta a peça
 	private Board board;
+	private boolean check;			// indica se o rei está em check
 	
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();	// peças no tabuleiro
 	private List<Piece> capturedPieces = new ArrayList<>();		// peças capturadas
@@ -25,7 +27,7 @@ public class ChessMatch {
 		
 		board = new Board(8, 8); 		// cria o tabuleiro com 8x8 posicoes
 		turn = 1;						// turno 1
-		currentPlayer = Color.WHITE;	//peças brancas começam primeiro
+		currentPlayer = Color.WHITE;	// peças brancas começam primeiro
 		
 		initialSetup(); 				// posiciona as peças no tabuleiro
 	}
@@ -36,6 +38,10 @@ public class ChessMatch {
 	
 	public Color getCurrentPlayer() {
 		return currentPlayer;
+	}
+	
+	public boolean getCheck() {
+		return check;
 	}
 	
 	// retorna uma matriz de peças de xadrez da partida
@@ -66,34 +72,58 @@ public class ChessMatch {
 	// faz a jogada e movimenta a peça no tabuleiro
 	public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
 		
-		Position source = sourcePosition.toPosition();	//recebe a posicao da peça
-		Position target = targetPosition.toPosition();	//posicao que deseja mover a peça
+		Position source = sourcePosition.toPosition();	// recebe a posicao da peça
+		Position target = targetPosition.toPosition();	// posicao que deseja mover a peça
 		
-		validateSourcePosition(source);					//valida se existe a posicao indicada
+		validateSourcePosition(source);					// valida se existe a posicao indicada
 		
-		validateTargetPosition(source, target);			//valida se pode ir para a posicao
+		validateTargetPosition(source, target);			// valida se pode ir para a posicao
 		
 		Piece capturedPiece = makeMove(source, target);
-		nextTurn();										//chama proximo turno
+		
+		// checa se jogar se colocou em cheque
+		if(testCheck(currentPlayer)) {
+			undoMove(source, target, capturedPiece);	// desfaz o movimento do jogador
+			throw new ChessException("You can't put yourself in check");
+		}
+		
+		check = (testCheck(opponent(currentPlayer))) ? true : false;	// check se o oponente ficou em cheque
+		
+		nextTurn();										// chama proximo turno
 		return (ChessPiece)capturedPiece;				// faz um downcast pois é tipo Piece, e nao uma peça do xadrez
 		
 	}
 	
-	//movimento da peça no tabuleiro
+	// movimento da peça no tabuleiro
 	private Piece makeMove(Position source, Position target) {
 		
-		Piece p = board.removePiece(source);				//retira a peça na origem dela
-		Piece capturedPiece = board.removePiece(target);	//remove a peça que estiver no caminha da outra peça
+		Piece p = board.removePiece(source);				// retira a peça na origem dela
+		Piece capturedPiece = board.removePiece(target);	// remove a peça que estiver no caminha da outra peça
 		
-		board.placePiece(p, target); 						//coloca a peça na nova posiçao
+		board.placePiece(p, target); 						// coloca a peça na nova posiçao
 		
 		//caso nao for null,  significa que houve peça capturada
 		if(capturedPiece != null) {
-			piecesOnTheBoard.remove(capturedPiece);			//remove da lista peça capturada
-			capturedPieces.add(capturedPiece);				//adiciona peça capturada a lista
+			piecesOnTheBoard.remove(capturedPiece);			// remove da lista peça capturada
+			capturedPieces.add(capturedPiece);				// adiciona peça capturada a lista
 		}
 		
-		return capturedPiece;								//retorna a peça capturada
+		return capturedPiece;								// retorna a peça capturada
+	}
+	
+	// desfaz movimento da peça
+	private void undoMove(Position source, Position target, Piece capturedPiece) {
+		
+		Piece p = board.removePiece(target);		// pega a peça removida do tabuleiro
+		board.placePiece(p, source);				// coloca na posicao de origem a peça que se moveu
+		
+		// se houve peça capturada, coloca em sua posiçao de origem também
+		if(capturedPiece != null) {
+			board.placePiece(capturedPiece, target);
+			capturedPieces.remove(capturedPiece);	// tira da lista de capturadas
+			piecesOnTheBoard.add(capturedPiece);	// coloca novamente no tabuleiro
+		}
+		
 	}
 
 	//valida se existe a posicao indicada
@@ -129,8 +159,46 @@ public class ChessMatch {
 		turn++;
 		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;	// expressao ternaria, se for white troca para black, se nao fica white
 	}
-
-	//Posiciona peça na linha/coluna indicada
+	
+	// returna cor do oponente
+	private Color opponent(Color color) {
+		return (color == Color.WHITE) ? Color.BLACK : Color.WHITE;
+	}
+	
+	// procura o rei nas listas
+	private ChessPiece king(Color color) {
+		
+		List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == color).collect(Collectors.toList());
+		
+		// percorre a lista atrás do rei
+		for(Piece p : list) {
+			if(p instanceof King) {
+				return (ChessPiece) p;
+			}
+		}
+		// se nao encontrar lança uma exceçao
+		throw new IllegalStateException("There is not " + color + " king on the board");
+	}
+	
+	// checa se o rei está em cheque
+	private boolean testCheck(Color color) {
+		
+		Position kingPosition = king(color).getChessPosition().toPosition();	// pega a posicao em forma de matriz
+		
+		// lista de peças do oponente
+		List<Piece> opponentPieces = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == opponent(color)).collect(Collectors.toList());
+		
+		for(Piece p : opponentPieces) {
+			boolean[][] mat = p.possibleMoves();
+			
+			if(mat[kingPosition.getRow()][kingPosition.getColumn()]) {
+				return true;	// se retornar true o rei está em cheque
+			}
+		}
+		return false;
+	}
+	
+	// Posiciona peça na linha/coluna indicada
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
 		board.placePiece(piece, new ChessPosition(column, row).toPosition()); 	// recebe linha/coluna e converte para console/xadrez
 		piecesOnTheBoard.add(piece);											// adiciona a peça na lista

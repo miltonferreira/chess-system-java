@@ -34,7 +34,7 @@ public class ChessPosition {
 	
 	//Converte posicoes indicadas da matriz para o console/xadrez
 	protected static ChessPosition fromPosition(Position position) {
-		return new ChessPosition((char)('a' - position.getColumn()), 8 - position.getRow());
+		return new ChessPosition((char)('a' + position.getColumn()), 8 - position.getRow());
 	}
 
 	@Override

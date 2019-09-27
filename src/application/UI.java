@@ -80,6 +80,10 @@ public class UI {
 		System.out.println("Turn : " + chessMatch.getTurn());					// mostra turno
 		System.out.println("Waiting player: " + chessMatch.getCurrentPlayer()); // mostra a cor da peça em jogo
 		
+		if(chessMatch.getCheck()) {
+			System.out.println("CHECK!");	// avisa que jogador está em cheque
+		}
+		
 	}
 
 	// recebe uma matriz de peças com movimentos possiveis da peça através da matriz
