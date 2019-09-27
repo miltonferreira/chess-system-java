@@ -19,6 +19,7 @@ public class ChessMatch {
 	private Color currentPlayer;	// indica se é branca ou preta a peça
 	private Board board;
 	private boolean check;			// indica se o rei está em check
+	private boolean checkMate;		// indica se rei tomou check mate
 	
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();	// peças no tabuleiro
 	private List<Piece> capturedPieces = new ArrayList<>();		// peças capturadas
@@ -42,6 +43,10 @@ public class ChessMatch {
 	
 	public boolean getCheck() {
 		return check;
+	}
+	
+	public boolean getCheckMate() {
+		return checkMate;
 	}
 	
 	// retorna uma matriz de peças de xadrez da partida
@@ -89,7 +94,14 @@ public class ChessMatch {
 		
 		check = (testCheck(opponent(currentPlayer))) ? true : false;	// check se o oponente ficou em cheque
 		
-		nextTurn();										// chama proximo turno
+		// checa se o oponente ficou em check mate
+		if(testCheckMate(opponent(currentPlayer))) {
+			checkMate = true;
+		}else{
+			nextTurn();										// chama proximo turno se nao houve check mate	
+		}
+		
+		
 		return (ChessPiece)capturedPiece;				// faz um downcast pois é tipo Piece, e nao uma peça do xadrez
 		
 	}
@@ -198,6 +210,39 @@ public class ChessMatch {
 		return false;
 	}
 	
+	// checa se o rei tomou check mate
+	private boolean testCheckMate(Color color) {
+		
+		if(!testCheck(color)) {
+			return false;	//se nao tiver em check retorna false
+		}
+		
+		List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == color).collect(Collectors.toList());
+		
+		// checa se alguma peça pode tirar o rei do check
+		for(Piece p : list) {
+			
+			boolean[][] mat = p.possibleMoves();
+			for(int i = 0; i < board.getRows(); i++) {
+				for(int j = 0; j < board.getColumns(); j++) {
+					// testa se esse movimento tira o rei do check
+					if(mat[i][j]) {
+						Position source = ((ChessPiece)p).getChessPosition().toPosition(); // pega a posiçao do p
+						Position target = new Position(i, j);				// cria um novo position com a posicao que tira o rei do check
+						Piece capturedPiece = makeMove(source, target);		// movimenta a peça
+						boolean testCheck = testCheck(color);				// verifica se o rei ainda está em check
+						undoMove(source, target, capturedPiece); 			// desfaz o movimento no final
+						if(!testCheck) {
+							return false;	// retorna que o rei na estava em check mate
+						}
+					}
+				}
+			}
+			
+		}
+		return true;	// indica que o rei tomou check mate
+	}
+	
 	// Posiciona peça na linha/coluna indicada
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
 		board.placePiece(piece, new ChessPosition(column, row).toPosition()); 	// recebe linha/coluna e converte para console/xadrez
@@ -206,7 +251,15 @@ public class ChessMatch {
 
 	// Inicia a partida de xadrez, colocando as peças no tabuleiro
 	private void initialSetup() {
-
+		
+		placeNewPiece('h', 7, new Rook(board, Color.WHITE));
+		placeNewPiece('d', 1, new Rook(board, Color.WHITE));
+		placeNewPiece('e', 1, new King(board, Color.WHITE));
+		
+		placeNewPiece('b', 8, new Rook(board, Color.BLACK));
+		placeNewPiece('a', 8, new King(board, Color.BLACK));
+		
+		/*
 		placeNewPiece('c', 1, new Rook(board, Color.WHITE));
 		placeNewPiece('c', 2, new Rook(board, Color.WHITE));
 		placeNewPiece('d', 2, new Rook(board, Color.WHITE));
@@ -220,7 +273,7 @@ public class ChessMatch {
 		placeNewPiece('e', 7, new Rook(board, Color.BLACK));
 		placeNewPiece('e', 8, new Rook(board, Color.BLACK));
 		placeNewPiece('d', 8, new King(board, Color.BLACK));
-
+		*/
 	}
 
 }
