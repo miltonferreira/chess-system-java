@@ -64,7 +64,7 @@ public class Pawn extends ChessPiece {
 			}
 
 			p.setValue(position.getRow() + 2, position.getColumn());					// recebe nova linha +2/coluna
-			Position p2 = new Position(position.getRow() - 1, position.getColumn());	// pega posicao a frente do peao
+			Position p2 = new Position(position.getRow() + 1, position.getColumn());	// pega posicao a frente do peao
 
 			// verifica se a posicao existe e nao tem peça na posiçao e o contador igual 0
 			if (getBoard().positionExists(p) && !getBoard().thereIsAPiece(p) && getMoveCount() == 0 && getBoard().positionExists(p2) && !getBoard().thereIsAPiece(p2)) {
